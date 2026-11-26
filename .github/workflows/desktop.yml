@@ -1,0 +1,58 @@
+name: Build Desktop
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            command: dist:win
+            name: Windows-x64
+          - os: macos-latest
+            command: dist:mac:local
+            name: macOS-x64-arm64-test
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Get source code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run logic tests
+        run: npm test
+
+      - name: Build test installer
+        run: npm run ${{ matrix.command }}
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.name }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            dist/*.exe
+            dist/*.dmg
