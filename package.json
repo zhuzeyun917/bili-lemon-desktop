@@ -1,0 +1,61 @@
+{
+  "name": "bili-lemon-desktop",
+  "version": "0.2.1",
+  "description": "Bilibili favorites desktop scheduler with a yellow interface",
+  "main": "main.cjs",
+  "author": "Bili Lemon contributors",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "node tests.cjs",
+    "dist:win": "electron-builder --win nsis --x64 --publish never",
+    "dist:mac": "electron-builder --mac dmg --x64 --arm64 --publish never",
+    "pack": "electron-builder --dir --publish never",
+    "dist:mac:local": "electron-builder --mac dmg --x64 --arm64 --publish never -c.mac.identity=null -c.mac.hardenedRuntime=false",
+    "dist:mac:signed": "electron-builder --mac dmg --x64 --arm64 --publish never -c.forceCodeSigning=true"
+  },
+  "devDependencies": {
+    "electron": "45.5.0",
+    "electron-builder": "26.18.1"
+  },
+  "build": {
+    "appId": "local.bililemon.desktop",
+    "productName": "Bili Lemon",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "engine.cjs",
+      "core.cjs",
+      "agent.js",
+      "ui/**/*",
+      "package.json",
+      "LICENSE"
+    ],
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.entertainment",
+      "hardenedRuntime": true
+    }
+  }
+}
