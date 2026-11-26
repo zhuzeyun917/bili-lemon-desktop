@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+  >
+
+  <title>Bili 柠檬 · 收藏夹播放器</title>
+
+  <link rel="stylesheet" href="control.css">
+  <script src="core.js" defer></script>
+  <script src="renderer.js" defer></script>
+</head>
+
+<body>
+  <div class="shell">
+    <header>
+      <a class="brand" href="#">
+        <span class="logo">▶</span>
+        <span>
+          Bili 柠檬
+          <small>FAVORITES PLAYER</small>
+        </span>
+      </a>
+
+      <div class="header-right">
+        <span class="pill">独立桌面版 · 不收集密码</span>
+        <button
+          id="theme"
+          class="quiet"
+          aria-pressed="true"
+        >
+          B 站黄色背景：开
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="eyebrow">
+          YOUR FAVORITES, AT YOUR PACE
+        </div>
+        <h1>让收藏，慢慢播放。</h1>
+        <p>
+          选一个收藏夹，安排好节奏。
+          剩下的时间，留给喜欢的内容。
+        </p>
+      </section>
+
+      <div id="notice" role="status" class="notice">
+        先在软件内登录 B 站，再读取自己的收藏夹。
+        首次有声播放可能需要在视频窗口手动点击一次。
+      </div>
+
+      <div class="layout">
+        <div class="left-stack">
+
+          <section class="card">
+            <div class="section-title">
+              <h2><span>01</span> 连接你的 B 站</h2>
+              <span id="account" class="tag">
+                尚未读取账号
+              </span>
+            </div>
+
+            <div class="row">
+              <button id="login">打开 B 站登录</button>
+              <button id="refresh" class="secondary">
+                读取账号和收藏夹
+              </button>
+              <button id="logout" class="secondary">
+                退出账号
+              </button>
+            </div>
+
+            <p class="hint">
+              在软件的 B 站窗口中登录，登录状态保存在本机，
+              与外部浏览器独立。无需输入或复制 Cookie。
+            </p>
+
+            <label for="folder">选择收藏夹</label>
+
+            <div class="row">
+              <select id="folder">
+                <option value="">请先读取收藏夹</option>
+              </select>
+              <button id="load" class="secondary">
+                加载视频
+              </button>
+            </div>
+
+            <details>
+              <summary>
+                没有读取到？使用收藏夹链接 / ID
+              </summary>
+              <div class="row">
+                <input
+                  id="manualFolder"
+                  placeholder="粘贴含 fid 的收藏夹网址，或数字 ID"
+                  aria-label="收藏夹链接或 ID"
+                >
+                <button
+                  id="manualLoad"
+                  class="secondary"
+                >
+                  加载
+                </button>
+              </div>
+            </details>
+          </section>
+
+          <section class="card">
+            <div class="section-title">
+              <h2><span>02</span> 安排播放节奏</h2>
+              <span class="tag">设置自动保存</span>
+            </div>
+
+            <div class="fields">
+              <label>
+                默认每条播放时长
+                <span class="input-unit">
+                  <input
+                    id="seconds"
+                    type="number"
+                    min="0"
+                    max="86400"
+                    value="60"
+                    step="1"
+                  >
+                  <em>秒</em>
+                </span>
+                <small>0 = 播放至当前分 P 结束</small>
+              </label>
+
+              <label>
+                两个视频之间的间隔
+                <span class="input-unit">
+                  <input
+                    id="gap"
+                    type="number"
+                    min="0"
+                    max="86400"
+                    value="10"
+                    step="1"
+                  >
+                  <em>秒</em>
+                </span>
+                <small>间隔期间暂停，结束后播放下一条</small>
+              </label>
+
+              <label>
+                播放总时长
+                <span class="input-unit">
+                  <input
+                    id="total"
+                    type="number"
+                    min="0.1"
+                    max="10080"
+                    value="120"
+                    step="0.1"
+                  >
+                  <em>分钟</em>
+                </span>
+                <small>
+                  含加载、缓冲和间隔；控制台暂停不计入
+                </small>
+              </label>
+
+              <label>
+                列表播放方式
+                <select id="mode">
+                  <option value="loop">列表循环</option>
+                  <option value="once">列表仅播放一次</option>
+                </select>
+                <small>顺序按收藏夹返回的列表排列</small>
+              </label>
+            </div>
+
+            <div class="switches">
+              <label>
+                <input id="unlimited" type="checkbox">
+                不限总时长（持续循环请同时选择“列表循环”）
+              </label>
+
+              <button
+                id="musicPreset"
+                class="secondary"
+                type="button"
+              >
+                一键听歌设置
+              </button>
+
+              <label>
+                <input
+                  id="muted"
+                  type="checkbox"
+                  checked
+                >
+                静音开始（更容易自动播放）
+              </label>
+
+              <span>单条可在下方覆盖默认时长</span>
+            </div>
+          </section>
+
+          <section class="card list-card">
+            <div class="section-title">
+              <h2><span>03</span> 播放清单</h2>
+              <span id="count" class="tag">0 个视频</span>
+            </div>
+
+            <div class="list-toolbar">
+              <label>
+                <input
+                  type="checkbox"
+                  id="selectAll"
+                  checked
+                >
+                全选可用视频
+              </label>
+
+              <button
+                id="cancelLoad"
+                class="text-button"
+                hidden
+              >
+                取消加载
+              </button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>播放</th>
+                    <th>视频</th>
+                    <th>单条时长 / 秒</th>
+                  </tr>
+                </thead>
+
+                <tbody id="items">
+                  <tr>
+                    <td colspan="3" class="empty">
+                      你的收藏夹，将在这里展开。
+                      <small>
+                        登录并加载后可勾选视频、分别设置时长。
+                      </small>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="hint">
+              留空沿用默认；0 表示播完。
+              多 P 视频第一版仅播放第 1 P。
+              失效或非普通视频不加入队列。
+            </p>
+          </section>
+        </div>
+
+        <aside>
+          <section class="card now">
+            <div class="section-title">
+              <h2>播放控制台</h2>
+              <span id="status" class="status">未开始</span>
+            </div>
+
+            <div class="disc"><span>▶</span></div>
+            <p class="eyebrow">NOW PLAYING</p>
+
+            <h3 id="nowTitle">下一段喜欢，即将开始</h3>
+            <p id="position" class="hint">
+              从收藏夹选择你的播放清单
+            </p>
+
+            <div class="metric">
+              <span>总剩余时间</span>
+              <strong id="remaining">02:00:00</strong>
+            </div>
+
+            <progress
+              id="progress"
+              value="0"
+              max="100"
+            ></progress>
+
+            <div class="stats">
+              <div>
+                <small>当前已播放</small>
+                <b id="played">00:00:00</b>
+              </div>
+              <div>
+                <small>间隔剩余</small>
+                <b id="gapLeft">—</b>
+              </div>
+            </div>
+
+            <button id="start" class="start">
+              ▶ 开始播放
+            </button>
+
+            <div class="transport">
+              <button
+                id="pause"
+                class="secondary"
+                disabled
+              >
+                暂停
+              </button>
+              <button
+                id="next"
+                class="secondary"
+                disabled
+              >
+                下一条
+              </button>
+              <button
+                id="stop"
+                class="secondary"
+                disabled
+              >
+                停止
+              </button>
+            </div>
+
+            <button
+              id="focusPlayer"
+              class="text-button wide"
+            >
+              打开 / 返回播放页面 ↗
+            </button>
+
+            <p class="hint center">
+              关闭控制台或播放窗口会停止任务。
+              系统睡眠或锁屏时停止，不自动恢复。
+            </p>
+          </section>
+
+          <section class="note">
+            <b>一点小提醒</b>
+            <p>
+              这是独立桌面个人观看工具，
+              不提供刷播放量、绕过会员或验证码的功能。
+              网站布局和接口更新可能需要适配。
+            </p>
+            <p>
+              黄色主题只影响软件内的页面，
+              不修改外部浏览器或 B 站服务器。
+            </p>
+          </section>
+        </aside>
+      </div>
+
+      <footer>
+        <span>Bili 柠檬 / Desktop v0.2.1</span>
+        <span>
+          非哔哩哔哩官方产品 · 数据仅保存于本机软件
+        </span>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
