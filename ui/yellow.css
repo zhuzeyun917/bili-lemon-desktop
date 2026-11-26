@@ -1,0 +1,27 @@
+/* 只修改页面背景，不改变视频、封面或字幕。 */
+
+html[data-bili-lemon="on"],
+html[data-bili-lemon="on"] body {
+  background-color: #fff1a6 !important;
+}
+
+html[data-bili-lemon="on"] :is(
+  #app,
+  .bili-header,
+  .bili-header__bar,
+  .bili-header__bar.slide-down,
+  .bili-feed4,
+  .bili-feed4-layout,
+  .bili-layout,
+  .video-container-v1,
+  .video-container-v1 .left-container,
+  .video-container-v1 .right-container,
+  .space-home,
+  .space-main,
+  .space-content,
+  .fav-main,
+  .fav-main .fav-list,
+  .international-header .mini-header
+) {
+  background-color: #fff1a6 !important;
+}
